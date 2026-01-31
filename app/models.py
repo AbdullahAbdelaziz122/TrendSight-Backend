@@ -1,20 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, Float, DateTime, String, Boolean, JSON, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
 from .database import Base
-
-# --- Enums for strict type checking based on Docs ---
-
-class ModelStatus(str, enum.Enum):
-    """Refers to  status (active, archived)"""
-    ACTIVE = "active"
-    ARCHIVED = "archived"
-
-class PredictionLabel(str, enum.Enum):
-    """Refers to [cite: 17, 18] Classes: {UP, DOWN}"""
-    UP = "UP"
-    DOWN = "DOWN"
+from .schemas import ModelStatus, PredictionLabel
 
 
 # --- Models ---
