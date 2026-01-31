@@ -1,65 +1,81 @@
-from sqlalchemy import Column, ForeignKey, Integer, Double, TIMESTAMP, DateTime, String, Boolean, JSON
-from .database import Base
+from sqlalchemy import Column, ForeignKey, Integer, Float, DateTime, String, Boolean, JSON, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+import enum
+from .database import Base
+
+# --- Enums for strict type checking based on Docs ---
+
+class ModelStatus(str, enum.Enum):
+    """Refers to  status (active, archived)"""
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
+class PredictionLabel(str, enum.Enum):
+    """Refers to [cite: 17, 18] Classes: {UP, DOWN}"""
+    UP = "UP"
+    DOWN = "DOWN"
+
+
+# --- Models ---
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'user' 
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True)
-    password = Column(String)
-    # I don't know what role dataType should be !!
-    role = Column()
-    created_at = Column(TIMESTAMP)
-
-
-class Model(Base):
-
-    __tablename__ = 'model'
-
-    id = Column(Integer, primary_key=True, index=True)
-    version = Column(String)
-    artifact_uri = Column(String)
-    trained_at = Column(DateTime)
-    metrics = Column(JSON)
-    # Should status datatype be custom datatype with only active or archived
-    status = Column()
-
-    predictions = relationship("Prediction", back_populates="model")
-
+    email = Column(String, unique=True, index=True) 
+    password = Column(String) 
+    role = Column(String, default="user")  
+    created_at = Column(DateTime(timezone=True), server_default=func.now()) 
 
 class Symbol(Base):
-
-    __tablename__ = 'symbol'
+    __tablename__ = 'symbol' 
 
     id = Column(Integer, primary_key=True, index=True)
-    ticker = Column(String, unique=True)
-    name = Column(String)
-    exchange = Column()
-    active = Column()
+    ticker = Column(String, unique=True, index=True) 
+    name = Column(String) 
+    exchange = Column(String) 
+    active = Column(Boolean, default=True) 
 
+    # Relationship to predictions
     predictions = relationship("Prediction", back_populates="symbol")
 
+class Model(Base):
+    __tablename__ = 'model' # [cite: 112]
 
+    id = Column(Integer, primary_key=True, index=True)
+    version = Column(String, unique=True) # [cite: 114]
+    artifact_uri = Column(String) # 
+    trained_at = Column(DateTime) # [cite: 116]
+    metrics = Column(JSON) # [cite: 117] Uses JSON type for "metrics (jsonb)"
+    
+    
+    status = Column(SQLAlchemyEnum(ModelStatus), default=ModelStatus.ACTIVE)
+
+    # Relationship to predictions
+    predictions = relationship("Prediction", back_populates="model")
 
 class Prediction(Base):
-
-    __tablename__ = 'prediction'
+    __tablename__ = 'prediction' # [cite: 120]
     
     id = Column(Integer, primary_key=True, index=True)
 
-    prediction = Column(String)
-    confidence = Column(Double)
-    horizon = Column()
-    created_at = Column(TIMESTAMP)
-
-    model_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    symbol_id = Column(Integer, ForeignKey('symbol.id'), nullable=False)
-
-    model = relationship("User", back_populates="predictions")
-    symbol =  relationship("Symbol", back_populates="predictions")
+    # Stores UP/DOWN 
+    prediction = Column(SQLAlchemyEnum(PredictionLabel)) 
     
+    
+    confidence = Column(Float) 
+    
+    
+    horizon = Column(String, default="1d") 
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+   
+    model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
+    
+    symbol_id = Column(Integer, ForeignKey('symbol.id'), nullable=False) 
 
 
-
-
+    model = relationship("Model", back_populates="predictions")
+    symbol = relationship("Symbol", back_populates="predictions")
