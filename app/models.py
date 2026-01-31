@@ -41,13 +41,13 @@ class Symbol(Base):
     predictions = relationship("Prediction", back_populates="symbol")
 
 class Model(Base):
-    __tablename__ = 'model' # [cite: 112]
+    __tablename__ = 'model' 
 
     id = Column(Integer, primary_key=True, index=True)
-    version = Column(String, unique=True) # [cite: 114]
-    artifact_uri = Column(String) # 
-    trained_at = Column(DateTime) # [cite: 116]
-    metrics = Column(JSON) # [cite: 117] Uses JSON type for "metrics (jsonb)"
+    version = Column(String, unique=True) 
+    artifact_uri = Column(String) 
+    trained_at = Column(DateTime) 
+    metrics = Column(JSON) 
     
     
     status = Column(SQLAlchemyEnum(ModelStatus), default=ModelStatus.ACTIVE)
@@ -56,26 +56,19 @@ class Model(Base):
     predictions = relationship("Prediction", back_populates="model")
 
 class Prediction(Base):
-    __tablename__ = 'prediction' # [cite: 120]
+    __tablename__ = 'prediction'
     
     id = Column(Integer, primary_key=True, index=True)
 
     # Stores UP/DOWN 
     prediction = Column(SQLAlchemyEnum(PredictionLabel)) 
-    
-    
     confidence = Column(Float) 
-    
-    
     horizon = Column(String, default="1d") 
-    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-   
-    model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
-    
-    symbol_id = Column(Integer, ForeignKey('symbol.id'), nullable=False) 
 
+    model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
+    symbol_id = Column(Integer, ForeignKey('symbol.id'), nullable=False) 
 
     model = relationship("Model", back_populates="predictions")
     symbol = relationship("Symbol", back_populates="predictions")
