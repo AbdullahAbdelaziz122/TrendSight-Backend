@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
-SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://abd:password@localhost/TrendSight"
+SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://abd:password@localhost/trendsight"
 
 # create_async_engine 
 engine = create_async_engine(
