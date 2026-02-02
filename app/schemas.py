@@ -1,24 +1,20 @@
-from pydantic import BaseModel
-import enum
-
-# Enums
-
-class ModelStatus(str, enum.Enum):
-    ACTIVE = "active"
-    ARCHIVED = "archived"
-
-class PredictionLabel(str, enum.Enum):
-    UP = "UP"
-    DOWN = "DOWN"
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from typing import Optional
 
 
+class UserBase(BaseModel):
+    email: EmailStr
+    role: str = "trader" 
 
 
-# Schema
-class User(BaseModel):
-    name: str
-    email:str
-    password:str
-    role: str
+class UserCreate(UserBase):
+    password: str
 
 
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
