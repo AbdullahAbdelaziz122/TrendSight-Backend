@@ -1,7 +1,7 @@
-from .configs.configs import get_settings
+from .configs import get_settings
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
-from . import schemas
+from .. import schemas
 
 def create_access_token(data: dict):
     to_encode = data.copy
