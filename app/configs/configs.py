@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List
 
 class Settings(BaseSettings):
     # Database
@@ -14,20 +15,16 @@ class Settings(BaseSettings):
     APP_NAME: str = "My FastAPI App"
     DEBUG: bool = False
     
-    # CORS
-    # ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
+    # CORS 
+    ALLOWED_ORIGINS: list[str] = ["*"]
     
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=True
+        case_sensitive=True,
+        extra="ignore" 
     )
 
-# Cache the settings object creation
 @lru_cache
 def get_settings() -> Settings:
-    """
-    Returns cached Settings instance.
-    This ensures .env file is read only once.
-    """
     return Settings()

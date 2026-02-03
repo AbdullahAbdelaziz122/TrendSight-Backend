@@ -1,9 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from .configs.configs import get_settings
 
+settings = get_settings()
 
-SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://abd:password@localhost/trendsight"
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # create_async_engine 
 engine = create_async_engine(
