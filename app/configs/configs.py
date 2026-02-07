@@ -5,7 +5,7 @@ from typing import List
 class Settings(BaseSettings):
     # Database
     DATABASE_URL: str
-    
+    REDIS_URL: str = "redis://localhost:6379/0"
     # JWT
     SECRET_KEY: str 
     ALGORITHM: str
