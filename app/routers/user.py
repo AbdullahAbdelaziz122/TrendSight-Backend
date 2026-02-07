@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
+import json
+import redis.asyncio as redis
 
 from .. import schemas
 from ..configs import oauth2
-from ..database import get_db
+from ..db.database import get_db
 from ..repository import userRepository
+from ..db.redis_client import get_redis
 
 router = APIRouter(
     prefix="/users",
@@ -30,6 +33,25 @@ async def get_all(
 async def get_user(
     id: int, 
     db: AsyncSession = Depends(get_db),
-    current_user: schemas.TokenData = Depends(oauth2.get_current_user)
+    current_user: schemas.TokenData = Depends(oauth2.get_current_user),
+    redis_client: redis.Redis = Depends(get_redis)
 ):
-    return await userRepository.get_user(id, db)
+
+    # Define unique cache Key
+    cache_key = f"user:{id}"
+
+    # check cache
+    cached_user = await redis_client.get(cache_key)
+    if cached_user:
+        print("Cache Hit!")
+        return json.loads(cached_user)
+    
+    print("Cache Miss - Fetching from DB")
+    user = await userRepository.get_user(id, db)
+
+    # Save 
+    if user:
+        user_data = schemas.UserResponse.model_validate(user).model_dump_json()
+        await redis_client.set(cache_key, user_data, ex=60)
+    
+    return user

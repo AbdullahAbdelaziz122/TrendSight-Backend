@@ -4,8 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import timedelta
 
+from ..db import database
+
 from ..configs import token
-from .. import database, models
+from .. import models
 from ..configs.hashing import Hash
 router = APIRouter(tags=["Authentication"])
 
